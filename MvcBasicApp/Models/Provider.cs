@@ -14,6 +14,7 @@ namespace MvcBasicApp.Models
         [StringLength(14, ErrorMessage = "The field {0} must be {2} and {1} characters", MinimumLength = 11)]
         public string Document { get; set; }
 
+        [DisplayName("Provider Type")]
         public ProviderType ProviderType { get; set; }
 
         public Adress Adress { get; set; }
