@@ -9,6 +9,7 @@ namespace MvcBasicApp.Models
 {
     public class Product : Entity
     {
+        [DisplayName("Provider")]
         public Guid ProviderId { get; set; }
 
         [Required(ErrorMessage = "The field {0} is required")]

@@ -12,24 +12,25 @@ using MvcBasicApp.Models;
 namespace MvcBasicApp.Controllers
 {
     [Authorize]
-    public class ProvidersController : Controller
+    public class ProductsController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public ProvidersController(ApplicationDbContext context)
+        public ProductsController(ApplicationDbContext context)
         {
             _context = context;
         }
 
         [AllowAnonymous]
-        // GET: Providers
+        // GET: Products
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Providers.ToListAsync());
+            var applicationDbContext = _context.Products.Include(p => p.Provider);
+            return View(await applicationDbContext.ToListAsync());
         }
 
         [AllowAnonymous]
-        // GET: Providers/Details/5
+        // GET: Products/Details/5
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -37,39 +38,42 @@ namespace MvcBasicApp.Controllers
                 return NotFound();
             }
 
-            var provider = await _context.Providers
+            var product = await _context.Products
+                .Include(p => p.Provider)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (provider == null)
+            if (product == null)
             {
                 return NotFound();
             }
 
-            return View(provider);
+            return View(product);
         }
 
-        // GET: Providers/Create
+        // GET: Products/Create
         public IActionResult Create()
         {
+            ViewData["ProviderId"] = new SelectList(_context.Providers, "Id", "Name");
             return View();
         }
 
-        // POST: Providers/Create
+        // POST: Products/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Provider provider)
+        public async Task<IActionResult> Create(Product product)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(provider);
+                _context.Add(product);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(provider);
+            ViewData["ProviderId"] = new SelectList(_context.Providers, "Id", "Name", product.ProviderId);
+            return View(product);
         }
 
-        // GET: Providers/Edit/5
+        // GET: Products/Edit/5
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -77,22 +81,23 @@ namespace MvcBasicApp.Controllers
                 return NotFound();
             }
 
-            var provider = await _context.Providers.FindAsync(id);
-            if (provider == null)
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
             {
                 return NotFound();
             }
-            return View(provider);
+            ViewData["ProviderId"] = new SelectList(_context.Providers, "Id", "Name", product.ProviderId);
+            return View(product);
         }
 
-        // POST: Providers/Edit/5
+        // POST: Products/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, Provider provider)
+        public async Task<IActionResult> Edit(Guid id, Product product)
         {
-            if (id != provider.Id)
+            if (id != product.Id)
             {
                 return NotFound();
             }
@@ -101,12 +106,12 @@ namespace MvcBasicApp.Controllers
             {
                 try
                 {
-                    _context.Update(provider);
+                    _context.Update(product);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProviderExists(provider.Id))
+                    if (!ProductExists(product.Id))
                     {
                         return NotFound();
                     }
@@ -117,10 +122,11 @@ namespace MvcBasicApp.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(provider);
+            ViewData["ProviderId"] = new SelectList(_context.Providers, "Id", "Name", product.ProviderId);
+            return View(product);
         }
 
-        // GET: Providers/Delete/5
+        // GET: Products/Delete/5
         public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
@@ -128,30 +134,31 @@ namespace MvcBasicApp.Controllers
                 return NotFound();
             }
 
-            var provider = await _context.Providers
+            var product = await _context.Products
+                .Include(p => p.Provider)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (provider == null)
+            if (product == null)
             {
                 return NotFound();
             }
 
-            return View(provider);
+            return View(product);
         }
 
-        // POST: Providers/Delete/5
+        // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var provider = await _context.Providers.FindAsync(id);
-            _context.Providers.Remove(provider);
+            var product = await _context.Products.FindAsync(id);
+            _context.Products.Remove(product);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProviderExists(Guid id)
+        private bool ProductExists(Guid id)
         {
-            return _context.Providers.Any(e => e.Id == id);
+            return _context.Products.Any(e => e.Id == id);
         }
     }
 }
